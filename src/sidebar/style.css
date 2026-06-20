@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: #060C1A;
+  --color-card: #0E1628;
+  --color-foreground: #F1F5F9;
+  --color-muted: #94A3B8;
+  --color-border: rgba(255,255,255,0.07);
+  --color-primary: #7C3AED;
+  --color-primary-foreground: #FFFFFF;
+  --color-success: #22C55E;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --radius: 0.75rem;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #060C1A;
+  color: #F1F5F9;
+  font-family: 'Inter', 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv02','cv03','cv04','cv11';
+}
+
+code, pre, .font-mono, kbd {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.35); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.6); }
+
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ── Glass utility ─────────────────────────────────────────── */
+.glass {
+  background: rgba(14,22,40,0.75);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ── Gradient text ─────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #A78BFA, #6366F1, #38BDF8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glow effects ──────────────────────────────────────────── */
+.glow-violet   { box-shadow: 0 0 24px rgba(124,58,237,0.4); }
+.glow-violet-sm { box-shadow: 0 0 10px rgba(124,58,237,0.25); }
+
+/* ── Animated conic border ─────────────────────────────────── */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-angle { to { --angle: 360deg; } }
+.conic-border {
+  background: conic-gradient(from var(--angle), transparent 30%, #7C3AED, transparent 70%);
+  animation: spin-angle 3s linear infinite;
+}
+
+/* ── Shimmer ───────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(30,41,59,0) 0%, rgba(124,58,237,0.1) 50%, rgba(30,41,59,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* ── Pulse glow ────────────────────────────────────────────── */
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 12px rgba(124,58,237,0.35); }
+  50%      { box-shadow: 0 0 28px rgba(124,58,237,0.7); }
+}
+.pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+
+/* ── Tab active pill ───────────────────────────────────────── */
+.tab-active-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  position: absolute; bottom: 3px;
+  animation: tab-dot-in 0.2s ease-out;
+}
+@keyframes tab-dot-in {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ── Selection ─────────────────────────────────────────────── */
+::selection { background: rgba(124,58,237,0.35); color: white; }
+
+/* ── Keep-alive tab panels (preserve state/in-flight requests across tab switches) ── */
+.tab-panel { transition: opacity 0.18s ease-out; }
+.tab-panel.active   { position: relative; opacity: 1; }
+.tab-panel.inactive { position: absolute; inset: 0; opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* ── Italic accent ─────────────────────────────────────────── */
+.accent-italic {
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #A78BFA, #60A5FA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
