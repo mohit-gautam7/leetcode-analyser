@@ -9,8 +9,7 @@ CodeSense-AI-*.zip
 **/node_modules
 .pnpm-store/
 
-# Build outputs
-dist/
+# Build outputs (dist/ is intentionally committed so users can install without building)
 build/
 *.dist
 

@@ -1,0 +1,29 @@
+/* CodeSense AI Content Script Styles */
+#codesense-toggle-btn {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2147483647;
+  width: 32px;
+  height: 64px;
+  background: linear-gradient(135deg, #8B5CF6, #6366F1);
+  border: none;
+  border-radius: 8px 0 0 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -2px 0 12px rgba(139, 92, 246, 0.4);
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 14px;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  font-family: monospace;
+  font-weight: bold;
+}
+#codesense-toggle-btn:hover {
+  width: 36px;
+  box-shadow: -4px 0 20px rgba(139, 92, 246, 0.6);
+}

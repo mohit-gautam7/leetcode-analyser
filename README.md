@@ -68,13 +68,13 @@ Get a free API key at [openrouter.ai/keys](https://openrouter.ai/keys) — no cr
 
 ## Installation
 
-### Option A — Pre-built ZIP (recommended, no setup needed)
+### Option A — Direct from GitHub (recommended, no setup needed)
 
-1. Download **`CodeSense-AI-v1.1.zip`** from [Releases](../../releases)
-2. Extract the ZIP to any folder
+1. Click **Code → Download ZIP** on this page (or clone the repo)
+2. Extract the ZIP anywhere
 3. Open Chrome → go to `chrome://extensions`
 4. Enable **Developer Mode** (toggle in top-right corner)
-5. Click **Load unpacked** → select the extracted folder
+5. Click **Load unpacked** → select the **`dist/`** folder inside the extracted folder
 6. Open any supported problem page — the extension activates automatically
 
 ### Option B — Build from source
