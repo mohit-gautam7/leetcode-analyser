@@ -127,6 +127,11 @@ src/
 
 ## Changelog
 
+### v1.2.0
+- **Fix: Code analysis suggestions now based on actual code** — AI reads your implementation before suggesting improvements; no longer suggests things you've already built
+- **Fix: Code Style scores no longer show 0%** — Readability, Quality, Efficiency now return honest scores (AI was receiving a broken placeholder before)
+- **Fix: Analysis cache extended** — Cache key now covers more of the code so changing your solution always triggers a fresh analysis
+
 ### v1.1.0
 - **Real company data** — 3,365 LeetCode problems × 700+ companies sourced from actual interview datasets. No more AI-guessing the same FAANG list for every problem
 - **Company problem browser** — click any company badge to see its full problem list, paginated with Load More; each problem links directly to LeetCode
