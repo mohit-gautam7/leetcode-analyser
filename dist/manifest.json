@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CodeSense AI",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "AI-powered coding assistant for LeetCode, Codeforces, GeeksForGeeks and 7 more platforms",
   "permissions": ["storage", "activeTab", "scripting", "sidePanel", "tabs"],
   "host_permissions": [
@@ -50,6 +50,7 @@
       "js": ["content.js"],
       "css": ["content.css"],
       "run_at": "document_idle",
+      "world": "MAIN",
       "all_frames": false
     }
   ],

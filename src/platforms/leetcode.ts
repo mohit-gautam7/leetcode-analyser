@@ -221,35 +221,53 @@ export class LeetCodePlatform extends BasePlatform {
 
   extractUserCode(): UserCode | null {
     try {
-      // Method 1: Monaco editor via window.monaco
       const win = window as unknown as Record<string, unknown>;
-      const monaco = win['monaco'] as { editor?: { getEditors?: () => Array<{ getValue?: () => string }> } } | undefined;
-      if (monaco?.editor?.getEditors) {
-        const editors = monaco.editor.getEditors();
-        if (editors?.length > 0) {
-          const code = editors[0].getValue?.() ?? '';
-          if (code) return { code, language: this.parseLanguage(this.extractLanguage()), lastModified: Date.now() };
+      const lang = () => this.parseLanguage(this.extractLanguage());
+
+      type MonacoEditor = { getValue?: () => string; getModel?: () => { getValue?: () => string } | null };
+      type MonacoAPI = { editor?: { getEditors?: () => MonacoEditor[]; getAllEditors?: () => MonacoEditor[] } };
+
+      // Method 1: window.monaco.editor.getEditors() — works when content script runs in MAIN world
+      const monaco = win['monaco'] as MonacoAPI | undefined;
+      if (monaco?.editor) {
+        const getAll = monaco.editor.getAllEditors ?? monaco.editor.getEditors;
+        const editors = getAll?.call(monaco.editor) ?? [];
+        for (const editor of editors) {
+          const code = editor.getValue?.() ?? editor.getModel?.()?.getValue?.() ?? '';
+          if (code.trim().length > 10) return { code, language: lang(), lastModified: Date.now() };
         }
       }
 
-      // Method 2: Look for monaco editor models
-      const monacoEditor = win['MonacoEnvironment'] as unknown;
-      if (monacoEditor) {
-        // Try to get value from Monaco model
+      // Method 2: LeetCode sometimes exposes editor on a known global key
+      for (const key of ['editor', '_editor', 'monacoEditor', '__editor']) {
+        const ed = win[key] as MonacoEditor | undefined;
+        if (ed?.getValue) {
+          const code = ed.getValue() ?? '';
+          if (code.trim().length > 10) return { code, language: lang(), lastModified: Date.now() };
+        }
       }
 
-      // Method 3: CodeMirror
+      // Method 3: Monaco model attached to the editor DOM element
+      const monacoEl = document.querySelector('.monaco-editor') as (Element & Record<string, unknown>) | null;
+      if (monacoEl) {
+        // Monaco attaches _modelData to the editor root in some versions
+        const modelData = monacoEl['_modelData'] as { model?: { getValue?: () => string } } | undefined;
+        const code = modelData?.model?.getValue?.() ?? '';
+        if (code.trim().length > 10) return { code, language: lang(), lastModified: Date.now() };
+      }
+
+      // Method 4: CodeMirror (older LeetCode)
       const cmEl = document.querySelector('.CodeMirror') as HTMLElement & { CodeMirror?: { getValue?: () => string } } | null;
       if (cmEl?.CodeMirror?.getValue) {
         const code = cmEl.CodeMirror.getValue();
-        if (code) return { code, language: this.parseLanguage(this.extractLanguage()), lastModified: Date.now() };
+        if (code.trim().length > 10) return { code, language: lang(), lastModified: Date.now() };
       }
 
-      // Method 4: Read Monaco view lines from DOM
+      // Method 5: Monaco view-line DOM scraping (last resort — only visible lines)
       const viewLines = document.querySelectorAll('.view-line');
       if (viewLines.length > 0) {
         const code = Array.from(viewLines).map((l) => l.textContent ?? '').join('\n');
-        if (code.trim()) return { code, language: this.parseLanguage(this.extractLanguage()), lastModified: Date.now() };
+        if (code.trim()) return { code, language: lang(), lastModified: Date.now() };
       }
 
       return null;

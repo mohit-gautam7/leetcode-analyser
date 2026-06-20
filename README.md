@@ -127,6 +127,10 @@ src/
 
 ## Changelog
 
+### v1.3.0
+- **Fix: Code extraction now reads full Monaco editor content** — content script now runs in the main JS world so it can access `window.monaco` directly; previously only visible lines were read due to Monaco's virtual rendering, causing the AI to see only the empty function stub
+- **Fix: Multiple Monaco fallback methods** — tries `getEditors()`, `getAllEditors()`, known global keys, DOM model data, CodeMirror, and view-line scraping in order
+
 ### v1.2.0
 - **Fix: Code analysis suggestions now based on actual code** — AI reads your implementation before suggesting improvements; no longer suggests things you've already built
 - **Fix: Code Style scores no longer show 0%** — Readability, Quality, Efficiency now return honest scores (AI was receiving a broken placeholder before)
