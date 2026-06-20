@@ -154,7 +154,7 @@ async function* streamAI(messages: MessageList, mode: AIMode, opts?: { maxTokens
 
 export const aiService = {
   async analyze(problem: Problem, code?: UserCode): Promise<AnalysisResult> {
-    const cacheKey = getCacheKey('analysis', problem.url, code?.code?.substring(0, 50) ?? '');
+    const cacheKey = getCacheKey('analysis', problem.url, code?.code?.substring(0, 200) ?? '');
     const cached = memoryCache.get<AnalysisResult>(cacheKey);
     if (cached) return cached;
 

@@ -48,15 +48,22 @@ export const prompts = {
       { role: 'system', content: SYSTEM_PROMPT },
       {
         role: 'user',
-        content: `Analyze this coding problem${hasCode ? ' and the provided code' : ''}.
+        content: `Analyze this coding problem${hasCode ? ' and the user\'s actual code' : ''}.
 
 ${problemContext(problem)}
 ${hasCode ? '\n' + codeContext(code!) : ''}
 
-Write like a friendly, encouraging mentor talking directly to the user (second person) — not a dry textbook. ${hasCode ? "If the code is already strong, say so genuinely before suggesting anything. " : ''}At least one item in "suggestions" should be phrased as a thought-provoking question that nudges the user toward the insight themselves (e.g. "Could sorting the array first help you prune branches earlier?") rather than just stating a fact.
+${hasCode ? `IMPORTANT — Base your entire analysis on the USER'S ACTUAL CODE above:
+- "approach": describe what the user's code is actually doing, not what the optimal approach would be in general
+- "currentComplexity": analyze the actual time/space complexity of the user's code as written
+- "suggestions": ONLY suggest improvements to things the user has NOT already implemented. Read the code carefully — do not suggest implementing something that is clearly already there. Focus on edge cases, variable naming, minor optimizations, or alternative approaches they haven't tried.
+- "codeQuality", "readability", "efficiency": score the actual code honestly (integer 0-100). Good working code should score 60-85. Only score below 40 if the code has serious issues.
+- If the code is already a strong solution, acknowledge that genuinely and keep suggestions minor.` : ''}
 
 Return ONLY this JSON object (no other text):
-{"approach":"brief description of optimal approach","currentComplexity":{"time":"O(?)","space":"O(?)","explanation":"why"},"requiredComplexity":{"time":"O(?)","space":"O(?)","explanation":"why optimal"},"codeQuality":${hasCode ? 'number 0-100' : 0},"readability":${hasCode ? 'number 0-100' : 0},"efficiency":${hasCode ? 'number 0-100' : 0},"suggestions":["improvement 1 (or a guiding question)","improvement 2"],"algorithms":["DFS","DP"...],"canOptimize":true,"optimizationSummary":"what can be improved, framed encouragingly"}`,
+{"approach":"what the user's code does / what approach it uses","currentComplexity":{"time":"O(?)","space":"O(?)","explanation":"why"},"requiredComplexity":{"time":"O(?)","space":"O(?)","explanation":"why this is optimal"},"codeQuality":${hasCode ? 72 : 0},"readability":${hasCode ? 68 : 0},"efficiency":${hasCode ? 65 : 0},"suggestions":["specific improvement based on actual code","another specific improvement or guiding question"],"algorithms":["DFS","DP"],"canOptimize":${hasCode ? 'true or false' : false},"optimizationSummary":"brief encouraging note on what could be better"}
+
+Replace the example numbers (72, 68, 65) with your actual honest assessment of the code. canOptimize must be true or false (boolean).`,
       },
     ];
   },
