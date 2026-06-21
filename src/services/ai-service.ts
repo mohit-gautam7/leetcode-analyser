@@ -47,6 +47,9 @@ function loadProblemsData(): Promise<Record<string, ProblemEntry>> {
   return _loadPromise;
 }
 
+// Kick off the data fetch immediately so it's ready before the first problem is detected
+loadProblemsData();
+
 type MessageList = Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
 
 function parseJSON<T>(text: string, fallback: T): T {

@@ -74,13 +74,14 @@ const COMPANY_COLORS: Record<string, string> = {
   'JPMorgan':        '#005EB8',
 };
 
-function CompanyBadge({ name, selected, onClick }: { name: string; selected?: boolean; onClick?: () => void }) {
+function CompanyBadge({ name, selected, onClick, delay = 0 }: { name: string; selected?: boolean; onClick?: () => void; delay?: number }) {
   const color = COMPANY_COLORS[name] ?? '#8B5CF6';
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   return (
     <motion.span
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.75, y: 4 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 22, delay }}
       onClick={onClick}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -89,15 +90,43 @@ function CompanyBadge({ name, selected, onClick }: { name: string; selected?: bo
         border: `1px solid ${selected ? color : color + '40'}`,
         fontSize: 10, fontWeight: 600, color, whiteSpace: 'nowrap',
         cursor: onClick ? 'pointer' : 'default', letterSpacing: '0.01em',
+        transition: 'background 0.2s, border-color 0.2s',
       }}
-      whileHover={{ scale: 1.06 }}
-      whileTap={onClick ? { scale: 0.95 } : {}}
+      whileHover={{ scale: 1.07, y: -1 }}
+      whileTap={onClick ? { scale: 0.93 } : {}}
       title={onClick ? `See more ${name} questions` : name}
     >
       <span style={{ width: 14, height: 14, borderRadius: '50%', background: color + '30', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 800, color }}>
         {initials}
       </span>
       {name}
+    </motion.span>
+  );
+}
+
+function CompanySkeletonBadge({ delay = 0, width = 64 }: { delay?: number; width?: number }) {
+  return (
+    <motion.span
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2, delay }}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        padding: '2px 7px 2px 4px', borderRadius: 20,
+        border: '1px solid rgba(100,116,139,0.12)',
+        overflow: 'hidden', position: 'relative',
+        width, height: 20, background: 'rgba(30,41,59,0.5)',
+      }}
+    >
+      <motion.div
+        style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(148,163,184,0.08) 50%, transparent 100%)',
+        }}
+        animate={{ x: ['-100%', '200%'] }}
+        transition={{ duration: 1.4, repeat: Infinity, ease: 'linear', delay }}
+      />
     </motion.span>
   );
 }
@@ -413,27 +442,29 @@ export default function App() {
 
               {/* Company tags row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', minHeight: 20 }}>
-                {companyTags.length > 0 ? (
-                  <>
-                    <Building2 size={10} color="#4B5563" style={{ flexShrink: 0 }} />
-                    {companyTags.map((c) => (
-                      <CompanyBadge
-                        key={c}
-                        name={c}
-                        selected={selectedCompany === c}
-                        onClick={() => toggleCompanyProblems(c)}
-                      />
-                    ))}
-                  </>
-                ) : loadingCompanies ? (
-                  <motion.span
-                    style={{ fontSize: 10, color: '#374151', fontStyle: 'italic' }}
-                    animate={{ opacity: [0.4, 1, 0.4] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    Detecting companies…
-                  </motion.span>
-                ) : null}
+                <AnimatePresence mode="wait">
+                  {companyTags.length > 0 ? (
+                    <motion.div key="badges" style={{ display: 'contents' }}>
+                      <Building2 size={10} color="#4B5563" style={{ flexShrink: 0 }} />
+                      {companyTags.map((c, i) => (
+                        <CompanyBadge
+                          key={c}
+                          name={c}
+                          selected={selectedCompany === c}
+                          onClick={() => toggleCompanyProblems(c)}
+                          delay={i * 0.04}
+                        />
+                      ))}
+                    </motion.div>
+                  ) : loadingCompanies ? (
+                    <motion.div key="skeletons" style={{ display: 'flex', alignItems: 'center', gap: 4 }} exit={{ opacity: 0 }}>
+                      <CompanySkeletonBadge width={70} delay={0} />
+                      <CompanySkeletonBadge width={56} delay={0.08} />
+                      <CompanySkeletonBadge width={80} delay={0.16} />
+                      <CompanySkeletonBadge width={50} delay={0.24} />
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
               </div>
 
               {/* Company-specific question list panel */}
