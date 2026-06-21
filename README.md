@@ -127,9 +127,12 @@ src/
 
 ## Changelog
 
+### v1.3.1
+- **Fix: Problem detection restored** — v1.3.0 switched content scripts to run in the page's main JS world to access `window.monaco`, which silently broke all `chrome.runtime` message passing and caused "Waiting for problem…" on every page. Reverted to the isolated world and instead inject a tiny inline `<script>` tag that runs synchronously in the main world, writes the Monaco code to a DOM attribute, then removes itself — so the extension can read it from the isolated world without losing Chrome API access
+
 ### v1.3.0
-- **Fix: Code extraction now reads full Monaco editor content** — content script now runs in the main JS world so it can access `window.monaco` directly; previously only visible lines were read due to Monaco's virtual rendering, causing the AI to see only the empty function stub
-- **Fix: Multiple Monaco fallback methods** — tries `getEditors()`, `getAllEditors()`, known global keys, DOM model data, CodeMirror, and view-line scraping in order
+- **Fix: Code extraction now reads full Monaco editor content** — content script injects a script into the main world to access `window.monaco` directly; previously only visible lines were read due to Monaco's virtual rendering, causing the AI to see only the empty function stub
+- **Fix: Multiple Monaco fallback methods** — tries `getEditors()`, `getAllEditors()`, known global keys, CodeMirror, and view-line scraping in order
 
 ### v1.2.0
 - **Fix: Code analysis suggestions now based on actual code** — AI reads your implementation before suggesting improvements; no longer suggests things you've already built
