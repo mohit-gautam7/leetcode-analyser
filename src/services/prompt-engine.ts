@@ -125,8 +125,15 @@ ${problemContext(problem)}
 
 ${codeContext(code)}
 
+CRITICAL CONSTRAINTS for optimizedCode:
+- PRESERVE the exact class name (e.g. "Solution"), method/function name, and parameter names/types as-is. Online judges call these by name — changing them causes compile errors.
+- Only change the implementation inside the function body.
+- If you add helper functions, use different names that don't clash with the original.
+- The optimized code must be a drop-in replacement that compiles and runs on the same judge.
+- Do NOT add memoization that is incorrect or uses a wrong key — if you add memoization, verify the key captures all relevant state and the logic is correct.
+
 Return ONLY this JSON (no other text):
-{"currentCode":"original code unchanged","optimizedCode":"fully optimized version","language":"${code.language}","beforeComplexity":{"time":"O(?)","space":"O(?)","explanation":"why"},"afterComplexity":{"time":"O(?)","space":"O(?)","explanation":"why faster"},"changes":[{"description":"what changed and why","impact":"time"}],"explanation":"overall optimization explanation"}`,
+{"currentCode":"original code unchanged","optimizedCode":"fully optimized version with same signatures","language":"${code.language}","beforeComplexity":{"time":"O(?)","space":"O(?)","explanation":"why"},"afterComplexity":{"time":"O(?)","space":"O(?)","explanation":"why faster"},"changes":[{"description":"what changed and why","impact":"time"}],"explanation":"overall optimization explanation"}`,
       },
     ];
   },

@@ -309,35 +309,39 @@ export const aiService = {
   },
 
   async applySuggestion(problem: Problem, code: UserCode, suggestion: string): Promise<string> {
+    const lines = code.code.split('\n');
     const messages: MessageList = [
       {
         role: 'user',
-        content: `You are a code editor. Apply EXACTLY the suggestion below to the code — touch NOTHING else.
+        content: `You are a surgical code editor. Apply ONE specific suggestion to the code below.
 
 SUGGESTION: "${suggestion}"
 
-STRICT RULES:
-- Do NOT change any logic, algorithm, or control flow.
-- Do NOT add, remove, or reorder functions or methods.
-- Do NOT restructure or reformat unrelated lines.
-- Only edit the specific lines directly affected by the suggestion (e.g. rename a variable, add a comment, extract a helper for one operation).
-- The output must be the same code with only the minimal lines changed.
-- If the suggestion is about naming: only rename that variable/function everywhere it appears — nothing else.
-- If the suggestion is about comments: only add/edit those comment lines — nothing else.
+ABSOLUTE RULES — violating any of these makes the output wrong:
+1. NEVER change class names, method names, or function signatures. Online judges require exact names.
+2. NEVER rewrite the algorithm or change control flow.
+3. NEVER add new functions, classes, or restructure the file.
+4. ONLY touch the lines that directly implement this suggestion:
+   - Rename a variable → change only that identifier on every line it appears
+   - Add a comment → insert only that comment line
+   - Use a constant → replace only the magic number with the named constant
+5. Every line NOT touched by the suggestion must be byte-for-byte identical to the original.
+6. The output must have the same number of lines ± the added/removed lines for the suggestion only.
 
 Problem: ${problem.title}
 Language: ${code.language}
+Total lines: ${lines.length}
 
-Current code:
+Current code (${lines.length} lines):
 \`\`\`${code.language}
 ${code.code}
 \`\`\`
 
-Return ONLY the updated code — no markdown fences, no explanation, no diff markers. Preserve every line that doesn't need to change exactly as-is.`,
+Output: the same code with only the minimal change for the suggestion. No markdown fences, no explanation.`,
       },
     ];
-    const result = await callAI(messages, 'analysis', { temperature: 0.1, maxTokens: 3072 });
-    return result.replace(/^```[\w]*\n?/m, '').replace(/\n?```$/m, '').trim();
+    const result = await callAI(messages, 'analysis', { temperature: 0.05, maxTokens: 3072 });
+    return result.replace(/^```[\w]*\n?/gm, '').replace(/\n?```\s*$/gm, '').trim();
   },
 
   async getCompanyTags(problem: Problem): Promise<string[]> {
