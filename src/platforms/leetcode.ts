@@ -223,21 +223,18 @@ export class LeetCodePlatform extends BasePlatform {
     try {
       const lang = () => this.parseLanguage(this.extractLanguage());
 
-      // Method 1: Inject a script into the main world to read window.monaco.
-      // Content scripts run in isolated world and cannot access window.monaco directly.
-      // A synchronously-appended <script> tag runs in the page's main world, writes the
-      // code to a data attribute, and the isolated script reads it back immediately.
-      const code = this.extractFromMainWorld();
-      if (code) return { code, language: lang(), lastModified: Date.now() };
+      // Monaco code is extracted by the sidebar via chrome.scripting.executeScript
+      // (world: MAIN) which bypasses page CSP. The content script only provides
+      // CodeMirror / view-line fallbacks for platforms without CSP issues.
 
-      // Method 2: CodeMirror (older LeetCode)
+      // Method 1: CodeMirror (older LeetCode)
       const cmEl = document.querySelector('.CodeMirror') as HTMLElement & { CodeMirror?: { getValue?: () => string } } | null;
       if (cmEl?.CodeMirror?.getValue) {
         const cmCode = cmEl.CodeMirror.getValue();
         if (cmCode.trim().length > 10) return { code: cmCode, language: lang(), lastModified: Date.now() };
       }
 
-      // Method 3: Monaco view-line DOM scraping (last resort — only visible lines)
+      // Method 2: Monaco view-line DOM scraping (partial — only visible lines)
       const viewLines = document.querySelectorAll('.view-line');
       if (viewLines.length > 0) {
         const viewCode = Array.from(viewLines).map((l) => l.textContent ?? '').join('\n');
@@ -245,51 +242,6 @@ export class LeetCodePlatform extends BasePlatform {
       }
 
       return null;
-    } catch {
-      return null;
-    }
-  }
-
-  private extractFromMainWorld(): string | null {
-    try {
-      const ATTR = 'data-cs-code';
-      const root = document.documentElement;
-
-      // Inject inline script that runs synchronously in the main world
-      const script = document.createElement('script');
-      script.textContent = `(function(){
-        try {
-          var m = window.monaco;
-          if (m && m.editor) {
-            var eds = (m.editor.getAllEditors || m.editor.getEditors).call(m.editor);
-            for (var i = 0; i < eds.length; i++) {
-              var v = eds[i].getValue ? eds[i].getValue() : (eds[i].getModel && eds[i].getModel() && eds[i].getModel().getValue ? eds[i].getModel().getValue() : '');
-              if (v && v.trim().length > 10) {
-                document.documentElement.setAttribute('${ATTR}', v);
-                return;
-              }
-            }
-          }
-          // Fallback: known global editor keys
-          var keys = ['editor','_editor','monacoEditor','__editor'];
-          for (var k = 0; k < keys.length; k++) {
-            var ed = window[keys[k]];
-            if (ed && ed.getValue) {
-              var val = ed.getValue();
-              if (val && val.trim().length > 10) {
-                document.documentElement.setAttribute('${ATTR}', val);
-                return;
-              }
-            }
-          }
-        } catch(e) {}
-      })()`;
-      root.appendChild(script);
-      script.remove();
-
-      const extracted = root.getAttribute(ATTR) ?? '';
-      root.removeAttribute(ATTR);
-      return extracted.trim().length > 10 ? extracted : null;
     } catch {
       return null;
     }

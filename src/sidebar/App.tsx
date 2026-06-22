@@ -157,6 +157,73 @@ async function askContentScript(tabId: number): Promise<{ problem: Problem | nul
   } catch { return { problem: null, code: null }; }
 }
 
+// Extract Monaco code directly from the page's main JS world using the scripting API.
+// This bypasses page CSP (unlike inline <script> injection) and works on LeetCode.
+async function extractMonacoCode(tabId: number): Promise<UserCode | null> {
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId },
+      world: 'MAIN',
+      func: () => {
+        try {
+          const win = window as Record<string, unknown>;
+          type Ed = { getValue?: () => string; getModel?: () => { getValue?: () => string } | null };
+          type MonacoAPI = { editor?: { getAllEditors?: () => Ed[]; getEditors?: () => Ed[] } };
+          const m = win['monaco'] as MonacoAPI | undefined;
+          if (m?.editor) {
+            const getAll = m.editor.getAllEditors ?? m.editor.getEditors;
+            const eds = getAll?.call(m.editor) ?? [];
+            for (const ed of eds) {
+              const v = (ed as Ed).getValue?.() ?? (ed as Ed).getModel?.()?.getValue?.() ?? '';
+              if (v.trim().length > 10) return v;
+            }
+          }
+          for (const key of ['editor', '_editor', 'monacoEditor', '__editor']) {
+            const ed = win[key] as Ed | undefined;
+            if (ed?.getValue) {
+              const v = ed.getValue() ?? '';
+              if (v.trim().length > 10) return v;
+            }
+          }
+        } catch { /* ignore */ }
+        return null;
+      },
+    });
+    const code = results?.[0]?.result ?? null;
+    if (!code) return null;
+
+    // Also detect the language from the page
+    const langResults = await chrome.scripting.executeScript({
+      target: { tabId },
+      world: 'ISOLATED',
+      func: () => {
+        const sels = [
+          '[id*="headlessui-listbox-button"]',
+          'button[class*="lang"]',
+          '[class*="language"] button',
+          '[data-mode-id]',
+        ];
+        for (const s of sels) {
+          const el = document.querySelector(s);
+          const text = el?.textContent?.trim() || el?.getAttribute('data-mode-id') || '';
+          if (text) return text;
+        }
+        return 'cpp';
+      },
+    });
+    const rawLang = (langResults?.[0]?.result as string) ?? 'cpp';
+    const langMap: Record<string, string> = {
+      'c++': 'cpp', 'cpp': 'cpp', 'python': 'python', 'python3': 'python',
+      'java': 'java', 'javascript': 'javascript', 'typescript': 'typescript',
+      'go': 'go', 'rust': 'rust', 'c': 'c',
+    };
+    const language = langMap[rawLang.toLowerCase().replace(/\s+/g, '')] ?? 'cpp';
+    return { code, language: language as UserCode['language'], lastModified: Date.now() };
+  } catch {
+    return null;
+  }
+}
+
 // ─── Main App ───────────────────────────────────────────────────────────────────
 export default function App() {
   const [activeTab, setActiveTab]     = useState<AIMode>('analysis');
@@ -261,9 +328,17 @@ export default function App() {
         if (delay > 0) await new Promise((r) => setTimeout(r, delay));
         if (myToken !== pollToken || activeTabIdRef.current !== tabId) return; // tab switched mid-poll
         const stored = await readFromStorage(tabId);
-        if (stored.problem) { applyProblem(stored.problem, stored.code); return; }
+        if (stored.problem) {
+          const code = stored.code ?? await extractMonacoCode(tabId);
+          applyProblem(stored.problem, code);
+          return;
+        }
         const fromCs = await askContentScript(tabId);
-        if (fromCs.problem) { applyProblem(fromCs.problem, fromCs.code); return; }
+        if (fromCs.problem) {
+          const code = fromCs.code ?? await extractMonacoCode(tabId);
+          applyProblem(fromCs.problem, code);
+          return;
+        }
       }
     }
 
@@ -338,9 +413,16 @@ export default function App() {
     setRefreshing(true);
     try {
       const stored = await readFromStorage(tabId);
-      if (stored.problem) { applyProblem(stored.problem, stored.code); return; }
+      if (stored.problem) {
+        const code = stored.code ?? await extractMonacoCode(tabId);
+        applyProblem(stored.problem, code);
+        return;
+      }
       const fromCs = await askContentScript(tabId);
-      if (fromCs.problem) applyProblem(fromCs.problem, fromCs.code);
+      if (fromCs.problem) {
+        const code = fromCs.code ?? await extractMonacoCode(tabId);
+        applyProblem(fromCs.problem, code);
+      }
     } finally { setTimeout(() => setRefreshing(false), 600); }
   }
 
