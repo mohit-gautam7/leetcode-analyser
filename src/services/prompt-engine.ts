@@ -54,16 +54,31 @@ ${problemContext(problem)}
 ${hasCode ? '\n' + codeContext(code!) : ''}
 
 ${hasCode ? `IMPORTANT — Base your entire analysis on the USER'S ACTUAL CODE above:
+
+COMPLEXITY ANALYSIS (be precise — this is the most important part):
+- Identify every data structure used and its per-operation cost:
+    std::map / std::set / std::multimap → O(log K) insert/lookup (BST)
+    std::unordered_map / unordered_set → O(1) average insert/lookup (hash)
+    std::vector → O(1) access, O(n) search
+    std::priority_queue / std::heap → O(log n) push/pop
+    std::sort → O(n log n)
+- Multiply by loop iterations to get total time complexity.
+- If a map/set is bounded by a constant (e.g. at most 26 chars, at most 10 digits), its contribution to space is O(1) and log factor may simplify.
+- "currentComplexity.time": the exact big-O of the user's code as written (e.g. if they use std::map with n iterations: O(n log K))
+- "currentComplexity.space": the exact auxiliary space (e.g. O(K) where K = distinct chars ≤ 26, which is O(1))
+- "requiredComplexity": the theoretically best possible for this problem class
+- Do NOT round O(n log K) to O(n) unless K is explicitly a fixed constant AND you state why
+
+OTHER RULES:
 - "approach": describe what the user's code is actually doing, not what the optimal approach would be in general
-- "currentComplexity": analyze the actual time/space complexity of the user's code as written
 - "suggestions": ONLY suggest improvements to things the user has NOT already implemented. Read the code carefully — do not suggest implementing something that is clearly already there. Focus on edge cases, variable naming, minor optimizations, or alternative approaches they haven't tried.
 - "codeQuality", "readability", "efficiency": score the actual code honestly (integer 0-100). Good working code should score 60-85. Only score below 40 if the code has serious issues.
 - If the code is already a strong solution, acknowledge that genuinely and keep suggestions minor.` : ''}
 
 Return ONLY this JSON object (no other text):
-{"approach":"what the user's code does / what approach it uses","currentComplexity":{"time":"O(?)","space":"O(?)","explanation":"why"},"requiredComplexity":{"time":"O(?)","space":"O(?)","explanation":"why this is optimal"},"codeQuality":${hasCode ? 72 : 0},"readability":${hasCode ? 68 : 0},"efficiency":${hasCode ? 65 : 0},"suggestions":["specific improvement based on actual code","another specific improvement or guiding question"],"algorithms":["DFS","DP"],"canOptimize":${hasCode ? 'true or false' : false},"optimizationSummary":"brief encouraging note on what could be better"}
+{"approach":"what the user's code does / what approach it uses","currentComplexity":{"time":"O(?) — e.g. O(n log K) for n iterations with std::map","space":"O(?) — e.g. O(K) = O(1) since K≤26","explanation":"step-by-step: loop n times × map op O(log K) = O(n log K); space: map holds ≤26 keys = O(1)"},"requiredComplexity":{"time":"O(?)","space":"O(?)","explanation":"why this is the theoretical minimum"},"codeQuality":${hasCode ? 72 : 0},"readability":${hasCode ? 68 : 0},"efficiency":${hasCode ? 65 : 0},"suggestions":["specific improvement based on actual code","another specific improvement or guiding question"],"algorithms":["DFS","DP"],"canOptimize":${hasCode ? 'true or false' : false},"optimizationSummary":"brief encouraging note on what could be better"}
 
-Replace the example numbers (72, 68, 65) with your actual honest assessment of the code. canOptimize must be true or false (boolean).`,
+Replace the example numbers (72, 68, 65) with your actual honest assessment of the code. canOptimize must be true or false (boolean). Fill in REAL complexity values, not the example strings above.`,
       },
     ];
   },
