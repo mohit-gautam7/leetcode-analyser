@@ -61,7 +61,10 @@ export type OpenRouterModel =
   | 'qwen/qwen3-235b-a22b'
   | 'nvidia/nemotron-3-ultra-550b-a55b:free'
   | 'nvidia/nemotron-3-super-120b-a12b:free'
-  | 'qwen/qwen3-coder:free';
+  | 'qwen/qwen3-coder:free'
+  | 'deepseek/deepseek-r1:free'
+  | 'deepseek/deepseek-v3:free'
+  | 'google/gemini-2.0-flash-exp:free';
 
 export type AIModel = NvidiaModel | OpenRouterModel;
 

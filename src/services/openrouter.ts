@@ -127,18 +127,56 @@ export const OPENROUTER_MODELS: Array<{
   },
   {
     id: 'qwen/qwen3-coder:free',
-    name: 'Qwen3 Coder',
+    name: 'Qwen3 Coder (Free)',
     description: 'Alibaba — Free, coding-specialized, 1M context',
+    contextLength: 1048576,
+    speed: 'fast',
+    free: true,
+  },
+  {
+    id: 'deepseek/deepseek-r1:free',
+    name: 'DeepSeek R1 (Free) ⭐ Best Free',
+    description: 'DeepSeek — Free reasoning model, best accuracy for complexity & algorithms',
+    contextLength: 163840,
+    speed: 'slow',
+    free: true,
+  },
+  {
+    id: 'deepseek/deepseek-v3:free',
+    name: 'DeepSeek V3 (Free)',
+    description: 'DeepSeek — Free, fast, strong code understanding',
+    contextLength: 131072,
+    speed: 'fast',
+    free: true,
+  },
+  {
+    id: 'google/gemini-2.0-flash-exp:free',
+    name: 'Gemini 2.0 Flash (Free)',
+    description: 'Google — Free, very fast, great for hints & chat',
     contextLength: 1048576,
     speed: 'fast',
     free: true,
   },
 ];
 
-// Single consistent free model for every task — same model family already
-// proven reliable on NVIDIA NIM, for true cross-provider consistency.
-export function selectAutoOpenRouterModel(_mode: string): OpenRouterModel {
-  return 'meta-llama/llama-3.3-70b-instruct:free';
+// Pick the best free model per task: reasoning models for analysis,
+// code-specialized for generation, fast models for chat/hints.
+export function selectAutoOpenRouterModel(mode: string): OpenRouterModel {
+  switch (mode) {
+    case 'analysis':
+    case 'debug':
+    case 'optimization':
+      // Reasoning model: thinks step-by-step → accurate complexity & bug detection
+      return 'deepseek/deepseek-r1:free';
+    case 'solution':
+    case 'dryrun':
+    case 'editorial':
+      // Code-specialized model → clean, idiomatic solutions
+      return 'qwen/qwen3-coder:free';
+    default:
+      // Fast model for chat, hints, interview, settings
+      return 'google/gemini-2.0-flash-exp:free';
+  }
 }
 
 export interface OpenRouterOptions {
