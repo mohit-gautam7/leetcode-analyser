@@ -312,9 +312,18 @@ export const aiService = {
     const messages: MessageList = [
       {
         role: 'user',
-        content: `You are a coding assistant. Apply ONLY the following specific improvement to the code below. Do not rewrite or restructure anything else — make the smallest targeted change that implements this suggestion.
+        content: `You are a code editor. Apply EXACTLY the suggestion below to the code — touch NOTHING else.
 
-Suggestion to apply: "${suggestion}"
+SUGGESTION: "${suggestion}"
+
+STRICT RULES:
+- Do NOT change any logic, algorithm, or control flow.
+- Do NOT add, remove, or reorder functions or methods.
+- Do NOT restructure or reformat unrelated lines.
+- Only edit the specific lines directly affected by the suggestion (e.g. rename a variable, add a comment, extract a helper for one operation).
+- The output must be the same code with only the minimal lines changed.
+- If the suggestion is about naming: only rename that variable/function everywhere it appears — nothing else.
+- If the suggestion is about comments: only add/edit those comment lines — nothing else.
 
 Problem: ${problem.title}
 Language: ${code.language}
@@ -324,11 +333,10 @@ Current code:
 ${code.code}
 \`\`\`
 
-Return ONLY the improved code (no markdown fences, no explanation, no comments about what changed). Just the raw code.`,
+Return ONLY the updated code — no markdown fences, no explanation, no diff markers. Preserve every line that doesn't need to change exactly as-is.`,
       },
     ];
-    const result = await callAI(messages, 'analysis', { temperature: 0.2, maxTokens: 3072 });
-    // Strip any accidental markdown fences
+    const result = await callAI(messages, 'analysis', { temperature: 0.1, maxTokens: 3072 });
     return result.replace(/^```[\w]*\n?/m, '').replace(/\n?```$/m, '').trim();
   },
 
