@@ -53,32 +53,43 @@ export const prompts = {
 ${problemContext(problem)}
 ${hasCode ? '\n' + codeContext(code!) : ''}
 
-${hasCode ? `IMPORTANT — Base your entire analysis on the USER'S ACTUAL CODE above:
+${hasCode ? `IMPORTANT — Base your entire analysis on the USER'S ACTUAL CODE above. Think step by step before writing the JSON.
 
-COMPLEXITY ANALYSIS (be precise — this is the most important part):
-- Identify every data structure used and its per-operation cost:
-    std::map / std::set / std::multimap → O(log K) insert/lookup (BST)
-    std::unordered_map / unordered_set → O(1) average insert/lookup (hash)
-    std::vector → O(1) access, O(n) search
-    std::priority_queue / std::heap → O(log n) push/pop
-    std::sort → O(n log n)
-- Multiply by loop iterations to get total time complexity.
-- If a map/set is bounded by a constant (e.g. at most 26 chars, at most 10 digits), its contribution to space is O(1) and log factor may simplify.
-- "currentComplexity.time": the exact big-O of the user's code as written (e.g. if they use std::map with n iterations: O(n log K))
-- "currentComplexity.space": the exact auxiliary space (e.g. O(K) where K = distinct chars ≤ 26, which is O(1))
-- "requiredComplexity": the theoretically best possible for this problem class
-- Do NOT round O(n log K) to O(n) unless K is explicitly a fixed constant AND you state why
+STEP 1 — IDENTIFY THE FULL ALGORITHM PATTERN FIRST (do this before computing complexity):
+Look for high-level patterns that determine complexity, not just the innermost loop:
+- Matrix exponentiation / fast matrix power → O(M³ log N) where M = matrix dimension, N = exponent
+- Binary search / divide and conquer → O(log N) factor
+- BFS/DFS on graph → O(V + E)
+- DP with memoization → O(states × transition cost)
+- Segment tree / BIT → O(N log N) build, O(log N) query
+- Backtracking → typically exponential unless pruned
+- Sorting → O(N log N)
+Use correct variable names in complexity: M for matrix size, K for alphabet/constant, N for input size. Do NOT flatten everything to a single "n".
 
-OTHER RULES:
-- "approach": describe what the user's code is actually doing, not what the optimal approach would be in general
-- "suggestions": ONLY suggest improvements to things the user has NOT already implemented. Read the code carefully — do not suggest implementing something that is clearly already there. Focus on edge cases, variable naming, minor optimizations, or alternative approaches they haven't tried.
-- "codeQuality", "readability", "efficiency": score the actual code honestly (integer 0-100). Good working code should score 60-85. Only score below 40 if the code has serious issues.
-- If the code is already a strong solution, acknowledge that genuinely and keep suggestions minor.` : ''}
+STEP 2 — COMPLEXITY ANALYSIS (data structure costs):
+- std::map / std::set → O(log K) per op (BST)
+- std::unordered_map / unordered_set → O(1) average
+- std::priority_queue → O(log N) push/pop
+- If a collection is bounded by a fixed constant (e.g. 26 letters, 10 digits), its space is O(1)
+- Multiply per-operation cost × number of calls to get total
+
+STEP 3 — currentComplexity vs requiredComplexity:
+- currentComplexity = exactly what the user's code does as written
+- requiredComplexity = the theoretical lower bound for THIS specific problem
+- If they are equal, set canOptimize = false and optimizationSummary = "Your solution is already optimal"
+- NEVER suggest an algorithm that is worse or irrelevant (e.g. Strassen's is NOT appropriate for competitive programming matrix problems)
+- If canOptimize = false, suggestions should only be style/readability improvements, NOT algorithmic rewrites
+
+STEP 4 — SUGGESTIONS RULES:
+- ONLY suggest improvements the user has NOT already implemented
+- Read carefully — if they already use memoization, don't suggest adding memoization
+- If code is already optimal, suggestions = minor style notes only (variable names, comments, edge cases)
+- Scores: good working optimal code → 80–95; good code with room for improvement → 60–79; buggy/slow → below 60` : ''}
 
 Return ONLY this JSON object (no other text):
-{"approach":"what the user's code does / what approach it uses","currentComplexity":{"time":"O(?) — e.g. O(n log K) for n iterations with std::map","space":"O(?) — e.g. O(K) = O(1) since K≤26","explanation":"step-by-step: loop n times × map op O(log K) = O(n log K); space: map holds ≤26 keys = O(1)"},"requiredComplexity":{"time":"O(?)","space":"O(?)","explanation":"why this is the theoretical minimum"},"codeQuality":${hasCode ? 72 : 0},"readability":${hasCode ? 68 : 0},"efficiency":${hasCode ? 65 : 0},"suggestions":["specific improvement based on actual code","another specific improvement or guiding question"],"algorithms":["DFS","DP"],"canOptimize":${hasCode ? 'true or false' : false},"optimizationSummary":"brief encouraging note on what could be better"}
+{"approach":"what the user's code does — describe the actual algorithm pattern (e.g. matrix exponentiation, two pointers, BFS)","currentComplexity":{"time":"O(?) using correct variables","space":"O(?)","explanation":"step-by-step reasoning e.g. matrix multiply is O(M³), called log N times via fast power → O(M³ log N)"},"requiredComplexity":{"time":"O(?)","space":"O(?)","explanation":"why this is the theoretical minimum for this problem"},"codeQuality":${hasCode ? 72 : 0},"readability":${hasCode ? 68 : 0},"efficiency":${hasCode ? 65 : 0},"suggestions":["improvement 1 based on actual code","improvement 2"],"algorithms":["Matrix Exponentiation","DP"],"canOptimize":${hasCode ? 'true or false — false if current already matches required' : false},"optimizationSummary":"honest summary — say optimal if it is"}
 
-Replace the example numbers (72, 68, 65) with your actual honest assessment of the code. canOptimize must be true or false (boolean). Fill in REAL complexity values, not the example strings above.`,
+Replace example numbers (72, 68, 65) with your real assessment. canOptimize must be a boolean. Use real variable names in complexity strings.`,
       },
     ];
   },
