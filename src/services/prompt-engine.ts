@@ -32,11 +32,16 @@ TAGS: ${problem.tags.join(', ')}
 `.trim();
 }
 
+const MAX_CODE_CHARS = 6000;
+
 function codeContext(code: UserCode): string {
+  const raw = code.code;
+  const truncated = raw.length > MAX_CODE_CHARS;
+  const display = truncated ? raw.slice(0, MAX_CODE_CHARS) + '\n// ... [truncated for context length]' : raw;
   return `
 USER CODE (${code.language}):
 \`\`\`${code.language}
-${code.code}
+${display}
 \`\`\`
 `.trim();
 }

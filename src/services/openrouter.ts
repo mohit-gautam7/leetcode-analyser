@@ -12,43 +12,43 @@ export const OPENROUTER_MODELS: Array<{
 }> = [
   {
     id: 'anthropic/claude-sonnet-4.6',
-    name: 'Claude Sonnet 4.6',
-    description: 'Anthropic — Best coding & reasoning balance',
+    name: 'Claude Sonnet 4.6 (Paid)',
+    description: 'Anthropic — Requires paid OpenRouter credits',
     contextLength: 1000000,
     speed: 'fast',
   },
   {
     id: 'anthropic/claude-opus-4',
-    name: 'Claude Opus 4',
-    description: 'Anthropic — Most powerful, best for complex problems',
+    name: 'Claude Opus 4 (Paid)',
+    description: 'Anthropic — Requires paid OpenRouter credits',
     contextLength: 200000,
     speed: 'slow',
   },
   {
     id: 'anthropic/claude-3.5-haiku',
-    name: 'Claude 3.5 Haiku',
-    description: 'Anthropic — Fastest Claude model',
+    name: 'Claude 3.5 Haiku (Paid)',
+    description: 'Anthropic — Requires paid OpenRouter credits',
     contextLength: 200000,
     speed: 'fast',
   },
   {
     id: 'openai/gpt-4o',
-    name: 'GPT-4o',
-    description: 'OpenAI — Strong coding & multimodal',
+    name: 'GPT-4o (Paid)',
+    description: 'OpenAI — Requires paid OpenRouter credits',
     contextLength: 128000,
     speed: 'fast',
   },
   {
     id: 'openai/gpt-4o-mini',
-    name: 'GPT-4o Mini',
-    description: 'OpenAI — Fast & cost-effective',
+    name: 'GPT-4o Mini (Paid)',
+    description: 'OpenAI — Requires paid OpenRouter credits',
     contextLength: 128000,
     speed: 'fast',
   },
   {
     id: 'openai/o4-mini',
-    name: 'o4-mini',
-    description: 'OpenAI — Best for reasoning & algorithms',
+    name: 'o4-mini (Paid)',
+    description: 'OpenAI — Requires paid OpenRouter credits',
     contextLength: 200000,
     speed: 'slow',
   },
@@ -127,16 +127,16 @@ export const OPENROUTER_MODELS: Array<{
   },
   {
     id: 'qwen/qwen3-coder:free',
-    name: 'Qwen3 Coder (Free)',
-    description: 'Alibaba — Free, coding-specialized, 1M context',
+    name: 'Qwen3 Coder (Free) ⭐ Best Free',
+    description: 'Alibaba — Free, coding-specialized, 1M context, used by Auto',
     contextLength: 1048576,
     speed: 'fast',
     free: true,
   },
   {
     id: 'deepseek/deepseek-r1:free',
-    name: 'DeepSeek R1 (Free) ⭐ Best Free',
-    description: 'DeepSeek — Free reasoning model, best accuracy for complexity & algorithms',
+    name: 'DeepSeek R1 (Free)',
+    description: 'DeepSeek — Reasoning model; small output quota, may truncate long code',
     contextLength: 163840,
     speed: 'slow',
     free: true,
@@ -144,7 +144,7 @@ export const OPENROUTER_MODELS: Array<{
   {
     id: 'deepseek/deepseek-v3:free',
     name: 'DeepSeek V3 (Free)',
-    description: 'DeepSeek — Free, fast, strong code understanding',
+    description: 'DeepSeek — Free, fast, 131K context, strong code understanding',
     contextLength: 131072,
     speed: 'fast',
     free: true,
@@ -159,23 +159,24 @@ export const OPENROUTER_MODELS: Array<{
   },
 ];
 
-// Pick the best free model per task: reasoning models for analysis,
-// code-specialized for generation, fast models for chat/hints.
+// Pick the best free model per task.
+// Qwen3 Coder has 1M context and is coding-specialized — best default for code tasks.
+// DeepSeek V3 free is fast with 131K context — good for chat/hints.
+// DeepSeek R1 free has small output quota (reasoning tokens eat space) — only for explicit selection.
 export function selectAutoOpenRouterModel(mode: string): OpenRouterModel {
   switch (mode) {
     case 'analysis':
     case 'debug':
     case 'optimization':
-      // Reasoning model: thinks step-by-step → accurate complexity & bug detection
-      return 'deepseek/deepseek-r1:free';
+      // 1M context + code-specialized → reads full code, precise complexity
+      return 'qwen/qwen3-coder:free';
     case 'solution':
     case 'dryrun':
     case 'editorial':
-      // Code-specialized model → clean, idiomatic solutions
       return 'qwen/qwen3-coder:free';
     default:
-      // Fast model for chat, hints, interview, settings
-      return 'google/gemini-2.0-flash-exp:free';
+      // Fast with large context for chat, hints, interview
+      return 'deepseek/deepseek-v3:free';
   }
 }
 
